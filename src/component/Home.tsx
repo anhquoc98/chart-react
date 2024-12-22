@@ -31,6 +31,25 @@ function Home() {
     const [timeSeries, setTimeSeries] = useState<Time[]>([]);
     const [noResults, setNoResults] = useState(false);
     const [number, setNumber] = useState<number>(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
+
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentTokens = tokenList.slice(indexOfFirstItem, indexOfLastItem);
+
+
+    const handleNextPage = () => {
+        if (indexOfLastItem < tokenList.length) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+    const handlePrevPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
     console.log(noResults)
     useEffect(() => {
         const fetchTokenList = async () => {
@@ -56,7 +75,7 @@ function Home() {
 
                 if (res && res.data && res.data.length > 0) {
                     const data = res.data[number];
-                    console.log(data[number],'================================');
+                    console.log(data[number], '================================');
 
                     if (data.time) {
                         const transformedData = Object.keys(data.time).map((key) => {
@@ -110,7 +129,6 @@ function Home() {
     }
 
 
-
     return (
         <div>
             <div className="container mx-auto p-6 text-white">
@@ -141,7 +159,7 @@ function Home() {
                                             <stop offset="95%" stopColor="#e91e63" stopOpacity={0.1}/>
                                         </linearGradient>
                                     </defs>
-                                    <CartesianGrid strokeDasharray="3 3"/>
+
                                     <XAxis dataKey="name" hide/>
                                     <YAxis hide/>
                                     <Tooltip/>
@@ -170,12 +188,12 @@ function Home() {
                                         bottom: 5,
                                     }}
                                 >
-                                    <CartesianGrid strokeDasharray="3 3" />
                                     <XAxis dataKey="name" hide/>
-                                    <YAxis />
-                                    <Tooltip />
+                                    <YAxis/>
+                                    <Tooltip/>
 
-                                    <Bar dataKey="close" fill="#00ffff" activeBar={<Rectangle fill="pink" stroke="blue" />} />
+                                    <Bar dataKey="close" fill="#00ffff"
+                                         activeBar={<Rectangle fill="pink" stroke="blue"/>}/>
                                 </BarChart>
                             </ResponsiveContainer>
 
@@ -204,10 +222,10 @@ function Home() {
                     </tr>
                     </thead>
                     <tbody>
-                    {tokenList.map((token, index) => (
-                        <tr key={index}  onClick={() => handleRowClick(token)}
+                    {currentTokens.map((token, index) => (
+                        <tr key={index} onClick={() => handleRowClick(token)}
                             className="cursor-pointer hover:bg-gray-100">
-                            <td className="px-4 py-2" >{++index}</td>
+                            <td className="px-4 py-2">{++index}</td>
                             <td className="px-4 py-2">
                                 <div className="flex items-center">
                                     <div className="w-4 h-4 rounded-full bg-gray-700 mr-2"></div>
@@ -222,6 +240,26 @@ function Home() {
                     ))}
                     </tbody>
                 </table>
+
+                <div className="flex justify-center items-center mt-4">
+                    <button
+                        onClick={handlePrevPage}
+                        disabled={currentPage === 1}
+                        className="bg-gray-600 px-4 py-2 rounded text-white"
+                    >
+                        Previous
+                    </button>
+                    <span className='mx-2'>
+                        Page {currentPage} of {Math.ceil(tokenList.length / itemsPerPage)}
+                    </span>
+                    <button
+                        onClick={handleNextPage}
+                        disabled={indexOfLastItem >= tokenList.length}
+                        className="bg-gray-600 px-4 py-2 rounded text-white"
+                    >
+                        Next
+                    </button>
+                </div>
             </div>
         </div>
     );
